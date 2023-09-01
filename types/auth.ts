@@ -6,6 +6,8 @@ export interface IInputs{
     password:string
 }
 
+
+
 export interface IAuthPageInput{
     register:  UseFormRegister<IInputs>
     errors: FieldErrors<IInputs>
@@ -16,4 +18,10 @@ export interface ISignUpFx{
     username: string
     email: string
     password:string
+}
+
+export interface ISignInFx{
+    url: string
+    username: string
+    password: string
 }

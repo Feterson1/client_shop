@@ -3,14 +3,17 @@ import EmailInput from '@/components/elements/AuthPage/EmailInput';
 import NameInput from '@/components/elements/AuthPage/NameInput';
 import PasswordInput from '@/components/elements/AuthPage/PasswordInput';
 import styles from '@/styles/Auth/index.module.scss';
+import spinnerStyles from '@/styles/spinner/index.module.scss';
 import { IInputs } from '@/types/auth';
-import { error } from 'console';
+import { showAuthError } from '@/utils/errors';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 
 
 
 const SignUpForm = ({switchForm} : {switchForm: () => void}) => {
+  const [spinner,setSpinner] = useState(false);
     const {
       register,
       formState: {errors},
@@ -18,6 +21,7 @@ const SignUpForm = ({switchForm} : {switchForm: () => void}) => {
       resetField     } = useForm<IInputs>();
     const onSubmit = async (data: IInputs) => {
         try{
+          setSpinner(true);
 
           const userData = await signUpFx({
             url:'/users/signup',
@@ -27,7 +31,9 @@ const SignUpForm = ({switchForm} : {switchForm: () => void}) => {
 
           });
           
-          console.log(userData);
+       if(!userData){
+        return
+       }
           
         resetField('name');
         resetField('email');
@@ -35,8 +41,12 @@ const SignUpForm = ({switchForm} : {switchForm: () => void}) => {
         switchForm()
         }catch(error){
 
+          showAuthError(error);
+
           toast.error((error as Error).message)
 
+        }finally{
+          setSpinner(false);
         }
 
     }
@@ -47,7 +57,9 @@ const SignUpForm = ({switchForm} : {switchForm: () => void}) => {
           <NameInput register={register} errors={errors}/>
           <EmailInput register={register} errors={errors}/>
         <PasswordInput register={register} errors={errors}/>
-          <button className={`${styles.form__button} ${styles.button} ${styles.submit}`}>SIGN UP</button>
+        <button className={`${styles.form__button} ${styles.button} ${styles.submit}`}>
+            {spinner? (<div className={spinnerStyles.spinner}/>) : ('Зарегистрироваться')}
+            </button>
         </form>
     
     </>
