@@ -2,6 +2,7 @@ import { MutableRefObject, useRef } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import styles from '@/styles/Auth/index.module.scss';
 import SignUpForm from '@/components/modules/AuthPage/SignUpForm';
+import SignInForm from '@/components/modules/AuthPage/SignInForm';
 
 
 
@@ -45,12 +46,7 @@ const AuthPage = () => {
       </div>
       <div className={`${styles.container} ${styles.b_container}`} id="b-container" ref={bContainer}>
         <div className={styles.container__inner}>
-        <form className={styles.form}>
-          <h2 className={`${styles.form__title} ${styles.title}`}>Sign in to Website</h2>
-          <input className={styles.form__input} type="text" placeholder="Email"/>
-          <input className={styles.form__input} type="password" placeholder="Password"/>
-          <button onClick={switchForm} className={`${styles.form__button} ${styles.button} ${styles.submit}`}>SIGN IN</button>
-        </form>
+        <SignInForm />
         </div>
       </div>
       <div className={styles.switch} id="switch-cnt" ref={switchCtn}>
