@@ -1,10 +1,13 @@
 import { signInFx } from '@/app/api/auth';
 import NameInput from '@/components/elements/AuthPage/NameInput';
 import PasswordInput from '@/components/elements/AuthPage/PasswordInput';
+import { $mode } from '@/context/mode';
 import styles from '@/styles/Auth/index.module.scss';
 import spinnerStyles from '@/styles/spinner/index.module.scss';
 import { IInputs } from '@/types/auth';
 import { showAuthError } from '@/utils/errors';
+import { useStore } from 'effector-react';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
@@ -13,6 +16,10 @@ import { toast } from 'react-toastify';
 const SignInForm = () => {
 
     const [spinner,setSpinner] = useState(false);
+
+    const mode = useStore($mode);
+    const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
+    const route = useRouter();
 
     const {
         register,
@@ -35,6 +42,7 @@ const SignInForm = () => {
 
             resetField('name');
             resetField('password');
+            route.push('/dashboard');
             
             
         } catch (error) {
@@ -51,11 +59,11 @@ const SignInForm = () => {
 
     return (
        <>
-        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-          <h2 className={`${styles.form__title} ${styles.title}`}>Войти на сайт</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className={`${styles.form} ${darkModeClass}`}>
+          <h2 className={`${styles.form__title} ${styles.title} ${darkModeClass}`}>Войти на сайт</h2>
           <NameInput register={register} errors={errors} />
             <PasswordInput register={register} errors={errors} />
-          <button className={`${styles.form__button} ${styles.button} ${styles.submit}`}>
+          <button className={`${styles.form__button} ${styles.button} ${styles.submit} ${darkModeClass}`}>
             {spinner? (<div className={spinnerStyles.spinner}/>) : ('Войти')}
             </button>
         </form>
