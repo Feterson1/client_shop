@@ -1,5 +1,4 @@
-import Header from '@/components/modules/Header/Header';
-import AuthPage from '@/components/templates/AuthPage/AuthPage';
+import Layout from '@/components/layout/layout';
 import Head from 'next/head'
 
 
@@ -13,14 +12,13 @@ function Dashboard() {
         <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
         <link rel="icon" type="image/svg" sizes="32x32" href="/img/logo.svg" />
       </Head>
-      <Header/>
+      <Layout>
       <main>
         <div className='overlay'>
         <h1>dashboard</h1>
         </div>
-
       </main>
-    
+      </Layout>
     </>
   )
 }
