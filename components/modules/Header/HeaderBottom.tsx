@@ -21,7 +21,7 @@ const HeaderBottom = () => {
             <div className={`container ${styles.header__bottom__container}`}>
                 <h1 className={styles.header__logo}>
                 <Link 
-                href={'/dashboard'} 
+                href={'/dashboard'}
                 legacyBehavior
                 passHref
                 >
