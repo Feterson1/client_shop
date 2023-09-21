@@ -52,3 +52,14 @@ export const checkUserAuthFx= createEffect(async (url: string) => {
     }
 
 });
+
+export const logoutFx= createEffect(async (url: string) => {
+
+    try {
+        await api.get(url);
+        
+    } catch (error) {
+        toast.error((error as Error).message);
+    }
+
+});
