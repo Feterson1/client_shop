@@ -1,10 +1,13 @@
 import getBetsellerOrNewPartsFx from '@/app/api/boilerParts';
 import BrandsSlider from '@/components/modules/DashboardPage/BrandsSliders';
+import CartAlert from '@/components/modules/DashboardPage/CartAlert';
 import DashboardSlider from '@/components/modules/DashboardPage/DashboardSlider';
 import { $mode } from '@/context/mode';
+import { $shoppingCart } from '@/context/shoppingCart';
 import styles from '@/styles/Dashboard/index.module.scss';
 import { IBoilerParts } from '@/types/boilerParts';
 import { useStore } from 'effector-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -14,6 +17,8 @@ const DashboardPage = () => {
     const [newParts,setNewParts] = useState<IBoilerParts>({} as IBoilerParts);
     const [betsellersParts,setBetsellersParts] = useState<IBoilerParts>({} as IBoilerParts);
     const [spinner,setSpinner] = useState(false);
+    const shoppingCart = useStore($shoppingCart);
+    const [showAlert,setShowAlert] = useState(!!shoppingCart.length);
 
     const mode = useStore($mode);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
@@ -39,9 +44,24 @@ const DashboardPage = () => {
         loadBoilerParts();
     },[])
 
+    const closeAlert = () => {
+        setShowAlert(false);
+    }
+
     return (
         <section className={styles.dashboard}>
             <div className={`container ${styles.dashboard__container}`}>
+                <AnimatePresence>
+                    {showAlert && (
+                    <motion.div
+                    initial={{opacity:0}}
+                    animate={{opacity:1}}
+                    exit={{opacity:0}}
+                    className={`${styles.dashboard__alert} ${darkModeClass}`}
+                    >
+                        <CartAlert count={shoppingCart.length} closeAlert={closeAlert}/>
+                    </motion.div>)}
+                </AnimatePresence>
                 <div className={styles.dashboard__brands}>
                     <BrandsSlider/>
                 </div>
