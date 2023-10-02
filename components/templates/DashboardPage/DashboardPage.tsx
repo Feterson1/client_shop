@@ -1,4 +1,4 @@
-import getBetsellerOrNewPartsFx from '@/app/api/boilerParts';
+import {getBetsellerOrNewPartsFx} from '@/app/api/boilerParts';
 import BrandsSlider from '@/components/modules/DashboardPage/BrandsSliders';
 import CartAlert from '@/components/modules/DashboardPage/CartAlert';
 import DashboardSlider from '@/components/modules/DashboardPage/DashboardSlider';
