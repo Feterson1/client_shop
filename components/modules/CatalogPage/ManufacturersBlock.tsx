@@ -1,14 +1,16 @@
 import { $mode } from "@/context/mode";
 import { useStore } from "effector-react";
 import styles from '@/styles/Catalog/index.module.scss';
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { IManufacturersBlockProps } from "@/types/catalog";
+import ManufacturersBlockItem from "./ManufacturersBlockItem";
 
 
 
-const ManufacturersBlock = ({title}: IManufacturersBlockProps) => {
+const ManufacturersBlock = ({title,manufacturersList,event}: IManufacturersBlockProps) => {
     const mode = useStore($mode);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
+    const checkedItems = manufacturersList.filter((item) => item.checked);
 
     return (
         <motion.div
@@ -19,7 +21,11 @@ const ManufacturersBlock = ({title}: IManufacturersBlockProps) => {
         >
             <h3 className={`${styles.manufacturers__title} ${darkModeClass}`}>Производитель котлов:</h3>
             <ul className={styles.manufacturers__list}>
-                {[].map((item) => <li key={item}></li>)}
+                <AnimatePresence>
+                {checkedItems.map((item) => 
+                <ManufacturersBlockItem key={item.id}  item={item} event={event}/>
+                )}
+                </AnimatePresence>
             </ul>
              
         </motion.div>

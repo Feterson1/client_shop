@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import ManufacturersBlock from '@/components/modules/CatalogPage/ManufacturersBlock';
 import FilterSelect from './FilterSelect';
 import { getBoilerPartsFx } from '@/app/api/boilerParts';
-import { $boilerParts, setBoilerParts } from '@/context/boilerParts';
+import { $boilerManufacturers, $boilerParts, $filteredBoilerParts, $partsManufacturers, setBoilerManufacturers, setBoilerParts, setPartsManufacturers, updateBoilerManufacturers, updatePartsManufacturers } from '@/context/boilerParts';
 import { toast } from 'react-toastify';
 import { useEffect, useState } from 'react';
 import styles from '@/styles/Catalog/index.module.scss';
@@ -14,17 +14,32 @@ import ReactPaginate from 'react-paginate';
 import { IQueryParams } from '@/types/catalog';
 import { useRouter } from 'next/router';
 import { IBoilerParts } from '@/types/boilerParts';
+import CatalogFilters from '@/components/modules/CatalogPage/CatalogFilters';
 
 const CatalogPage = ({query}: {query:IQueryParams}) => {
-
+    
+    const boilerManufacturers = useStore($boilerManufacturers);
+    const partsManufacturers = useStore($partsManufacturers);
+    const filteredBoilerParts = useStore($filteredBoilerParts);
+    const [isFilterInQuery,setIsFilterInQuery] = useState(false);
     const mode = useStore($mode);
     const boilerParts = useStore($boilerParts);
     const [spinner,setSpinner] = useState(false);
+    const [priceRange,setPriceRange] = useState([1000,9000]);
+    const [isPriceRangeChanged,setIsPriceRangeChanged] = useState(false);
     const isValidOffset = query.offset && !isNaN(+query.offset) && +query.offset > 0;
     const [currentPage,setCurrentPage] = useState(isValidOffset? +query.offset-1 : 0);
     const pageCount  = Math.ceil(boilerParts.count / 20);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
     const router = useRouter();
+
+    const isAnyBoilerManufacturerChecked = boilerManufacturers.some((item) => item.checked);
+    const isAnyPartsManufacturerChecked = partsManufacturers.some((item) => item.checked);
+    const resetFilterBtnDisabled = !(
+        isPriceRangeChanged || 
+        isAnyBoilerManufacturerChecked || 
+        isAnyPartsManufacturerChecked );
+    
 
     const LoadBoilerParts = async () => {
         try {
@@ -51,48 +66,93 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
                         }
                     },undefined,{shallow:true})
                     setCurrentPage(0);
-                    setBoilerParts(data);
+                    setBoilerParts(isFilterInQuery? filteredBoilerParts : data);
                     return
 
                 }
+                const offset = +query.offset - 1;
+                const result = await getBoilerPartsFx(`/boiler-parts/?limit=20&offset=${offset}`);
+                setCurrentPage(offset);
+                setBoilerParts(isFilterInQuery? filteredBoilerParts : result);
+                return
             }
             
-            const offset = +query.offset - 1;
-            const result = await getBoilerPartsFx(`/boiler-parts/?limit=20&offset=${offset}`);
-            setCurrentPage(offset);
-            setBoilerParts(result);
+          
         } catch (error) {
-           
             toast.error((error as Error).message);
+           
+           
         }finally{
-            setSpinner(false);
+            setTimeout(()=>setSpinner(false),1000);
         }
 
     }
-    console.log(boilerParts.rows)
+    
     useEffect(()=> {
         LoadBoilerParts();
-    },[])
+    },[filteredBoilerParts,isFilterInQuery])
 
     const resetPagination = (data: IBoilerParts) => {
         setCurrentPage(0);
         setBoilerParts(data);
     }
 
+    const resetFilters = async () => { 
+       try {
+        const data = await getBoilerPartsFx('/boiler-parts?limit=20&offset=0');
+
+        const params = router.query;
+        delete params.boiler;
+        delete params.parts;
+        delete params.priceFrom;
+        delete params.priceTo;
+        params.first = 'cheap';
+
+        router.push({query: {...params}},undefined,{shallow: true});
+
+        setBoilerManufacturers(
+            boilerManufacturers.map((item) => ({...item, checked: false}) )
+        );
+        setPartsManufacturers(
+            partsManufacturers.map((item) => ({...item, checked: false}) )
+        );
+
+        setBoilerParts(data);
+        setPriceRange([1000,9000]);
+        setIsPriceRangeChanged(false);
+        
+       } catch (error) {
+        toast.error((error as Error).message);
+       }
+    }
+
     const handlePageChange = async ({selected}: {selected: number}) => {
+        setSpinner(true);
         try {
             const data = await getBoilerPartsFx('/boiler-parts?limit=20&offset=0');
             if(selected > pageCount){
-               resetPagination(data);
+               resetPagination(isFilterInQuery? filteredBoilerParts : data);
                 return
             }
 
             if(isValidOffset && +query.offset > Math.ceil(data.count / 2)){
-                resetPagination(data);
+                resetPagination(isFilterInQuery? filteredBoilerParts : data);
                 return
             }
 
-            const result = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${selected}`);
+            const result = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${selected}
+            ${isFilterInQuery && router.query.boiler?
+                `&boiler=${router.query.boiler}`: ''
+            }
+            ${isFilterInQuery && router.query.parts?
+                `&parts=${router.query.parts}` : ''
+            }
+            ${isFilterInQuery && router.query.priceFrom && router.query.priceTo? 
+                `&priceFrom=${router.query.priceFrom}&priceTo=${router.query.priceTo}` : ''
+            }
+                 
+                 
+                 `);
 
             router.push({
                 query: {
@@ -105,7 +165,10 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
             setBoilerParts(result);
 
         } catch (error) {
+            toast.error((error as Error).message);
             
+        }finally{
+            setTimeout(()=>setSpinner(false),1000);
         }
     }
 
@@ -117,26 +180,44 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
                 <h2 className={`${styles.catalog__title} ${darkModeClass}`}>Каталог товаров</h2>
                 <div className={`${styles.catalog__top} ${darkModeClass}`}>
                     <AnimatePresence>
-                       {false && <ManufacturersBlock title='Производитель котлов:'/>}
+                       {isAnyBoilerManufacturerChecked && <ManufacturersBlock 
+                       title='Производитель котлов:' 
+                       event={updateBoilerManufacturers}
+                       manufacturersList={boilerManufacturers}
+                       />}
                     </AnimatePresence>
                     <AnimatePresence>
-                   {false && <ManufacturersBlock title='Производитель запчастей:'/>}
+                   {isAnyPartsManufacturerChecked && <ManufacturersBlock 
+                   title='Производитель запчастей:' 
+                   event={updatePartsManufacturers}
+                   manufacturersList={partsManufacturers}
+                   />}
                     </AnimatePresence>
                     <div className={styles.catalog__top__inner}>
                         <button
                          className={`${styles.catalog__top__reset} ${darkModeClass}`}
-                         disabled={true}
+                         disabled={resetFilterBtnDisabled}
+                         onClick={resetFilters}
                          >Сбросить фильтр</button>
-                        <FilterSelect/>
+                        <FilterSelect setSpinner={setSpinner}/>
                     </div>
 
                 </div>
                 <div className={`${styles.catalog__bottom}`}>
                     <div className={styles.catalog__bottom__inner}>
-                        <div>Filters</div>
+                        <CatalogFilters 
+                        priceRange={priceRange} 
+                        setPriceRange={setPriceRange} 
+                        setIsPriceRangeChanged={setIsPriceRangeChanged}
+                        resetFilterBtnDisabled={resetFilterBtnDisabled}
+                        resetFilters={resetFilters}
+                        isPriceRangeChanged={isPriceRangeChanged}
+                        currentPage={currentPage}
+                        setIsFilterInQuery={setIsFilterInQuery}
+                        />
                         {spinner? (
                         <ul className={skeletonStyles.skeleton}>
-                            {Array.from(new Array(8)).map((_,i) => (
+                            {Array.from(new Array(20)).map((_,i) => (
                             <li 
                             key={i} 
                             className={`${skeletonStyles.skeleton__item} ${mode === 'dark'? `${skeletonStyles.dark_mode}` : ``}`}
