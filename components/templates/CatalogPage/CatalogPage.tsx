@@ -7,14 +7,17 @@ import { getBoilerPartsFx } from '@/app/api/boilerParts';
 import { $boilerManufacturers, $boilerParts, $filteredBoilerParts, $partsManufacturers, setBoilerManufacturers, setBoilerParts, setPartsManufacturers, updateBoilerManufacturers, updatePartsManufacturers } from '@/context/boilerParts';
 import { toast } from 'react-toastify';
 import { useEffect, useState } from 'react';
-import styles from '@/styles/Catalog/index.module.scss';
-import skeletonStyles from '@/styles/skeleton/index.module.scss'
 import CatalogItem from './CatalogItem';
 import ReactPaginate from 'react-paginate';
 import { IQueryParams } from '@/types/catalog';
 import { useRouter } from 'next/router';
 import { IBoilerParts } from '@/types/boilerParts';
 import CatalogFilters from '@/components/modules/CatalogPage/CatalogFilters';
+import { usePopup } from '@/hooks/usePopup';
+import { checkQueryParams } from '@/utils/catalog';
+import FilterSvg from '@/components/elements/FilterSvg/FilterSvg';
+import skeletonStyles from '@/styles/skeleton/index.module.scss'
+import styles from '@/styles/Catalog/index.module.scss';
 
 const CatalogPage = ({query}: {query:IQueryParams}) => {
     
@@ -87,6 +90,8 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
         }
 
     }
+
+    const {toggleOpen,open,ClosePopup} = usePopup();
     
     useEffect(()=> {
         LoadBoilerParts();
@@ -139,15 +144,20 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
                 resetPagination(isFilterInQuery? filteredBoilerParts : data);
                 return
             }
+            const {
+                isValidBoilerQuery,
+                isValidPartsQuery,
+                isValidPriceQuery,
+            } = checkQueryParams(router);
 
             const result = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${selected}
-            ${isFilterInQuery && router.query.boiler?
+            ${isFilterInQuery && isValidBoilerQuery?
                 `&boiler=${router.query.boiler}`: ''
             }
-            ${isFilterInQuery && router.query.parts?
+            ${isFilterInQuery && isValidPartsQuery?
                 `&parts=${router.query.parts}` : ''
             }
-            ${isFilterInQuery && router.query.priceFrom && router.query.priceTo? 
+            ${isFilterInQuery && isValidPriceQuery? 
                 `&priceFrom=${router.query.priceFrom}&priceTo=${router.query.priceTo}` : ''
             }
                  
@@ -198,7 +208,24 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
                          className={`${styles.catalog__top__reset} ${darkModeClass}`}
                          disabled={resetFilterBtnDisabled}
                          onClick={resetFilters}
-                         >Сбросить фильтр</button>
+                         >
+                        Сбросить фильтр
+                         </button>
+                         <button
+                         className={styles.catalog__top__mobile_btn}
+                         onClick={toggleOpen}
+                         >
+                            <span  
+                            className={styles.catalog__top__mobile_btn__svg}
+                            >
+                            <FilterSvg/>
+                            </span>
+                            <span
+                             className={styles.catalog__top__mobile_btn__text}
+                            >
+                            Фильтр
+                            </span>
+                         </button>
                         <FilterSelect setSpinner={setSpinner}/>
                     </div>
 
@@ -214,6 +241,8 @@ const CatalogPage = ({query}: {query:IQueryParams}) => {
                         isPriceRangeChanged={isPriceRangeChanged}
                         currentPage={currentPage}
                         setIsFilterInQuery={setIsFilterInQuery}
+                        ClosePopup={ClosePopup}
+                        filtersMobileOpen={open}
                         />
                         {spinner? (
                         <ul className={skeletonStyles.skeleton}>

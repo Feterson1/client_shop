@@ -4,9 +4,10 @@ import { ICatalogFiltersProps } from "@/types/catalog";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useStore } from "effector-react";
-import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturersFromQuery, setFileredBoilerParts, setPartsManufacturersFromQuery } from "@/context/boilerParts";
+import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturersFromQuery,setPartsManufacturersFromQuery } from "@/context/boilerParts";
 import { useRouter } from "next/router";
-import { getBoilerPartsFx } from "@/app/api/boilerParts";
+import CatalogFiltersMobile from "./CatalogFiltersMobile";
+import { checkQueryParams, updateParamsAndFilter, updateParamsAndFilterFromQuery } from "@/utils/catalog";
 import { getQueryParamOnFirstRender } from "@/utils/common";
 
 const CatalogFilters = ({
@@ -18,6 +19,8 @@ const CatalogFilters = ({
     isPriceRangeChanged,
     currentPage,
     setIsFilterInQuery,
+    ClosePopup,
+    filtersMobileOpen
 }: ICatalogFiltersProps) => {
 
 
@@ -32,30 +35,28 @@ const CatalogFilters = ({
 
     },[])
 
+
+   
+
     const applyFiltersFromQuery = async () => {
     try {
-        const priceFromQueryValue = getQueryParamOnFirstRender('priceFrom',router);
-        const priceToQueryValue = getQueryParamOnFirstRender('priceTo',router);
-        const boilerQueryValue = JSON.parse(
-            decodeURIComponent(
-                getQueryParamOnFirstRender('boiler',router) as string
-            )
-                );
-        const partsQueryValue = JSON.parse(
-                    decodeURIComponent(
-                        getQueryParamOnFirstRender('parts',router) as string
-                    )
-                        );
 
-        const isValidBoilerQuery = Array.isArray(boilerQueryValue) && !!boilerQueryValue?.length;
-        const isValidPartsQuery = Array.isArray(partsQueryValue) && !!partsQueryValue?.length;
-                        
+        const {
+            isValidBoilerQuery,
+            isValidPartsQuery,
+            isValidPriceQuery,
+            priceFromQueryValue,
+            priceToQueryValue,
+            boilerQueryValue,
+            partsQueryValue
+        } = checkQueryParams(router);
+
+       
         const boilerQuery = `&boiler=${getQueryParamOnFirstRender('boiler',router)}`;
         const partsQuery = `&parts=${getQueryParamOnFirstRender('parts',router)}`;
-
         const priceQuery = `&priceFrom=${priceFromQueryValue}&priceTo=${priceToQueryValue}`;
 
-        if(isValidBoilerQuery && isValidPartsQuery && priceFromQueryValue && priceToQueryValue){
+        if(isValidBoilerQuery && isValidPartsQuery && isValidPriceQuery){
             
             updateParamsAndFilterFromQuery(() => {
                 updatePriceFromQuery(+priceFromQueryValue,+priceToQueryValue);
@@ -64,7 +65,7 @@ const CatalogFilters = ({
             },`${currentPage}${priceQuery}${boilerQuery}${partsQuery}`)
             return
         }
-        if(priceFromQueryValue && priceToQueryValue){
+        if(isValidPriceQuery){
             updateParamsAndFilterFromQuery(() => {
                 updatePriceFromQuery(+priceFromQueryValue,+priceToQueryValue);
                 
@@ -97,7 +98,7 @@ const CatalogFilters = ({
             },`${currentPage}${partsQuery}`)
           
         }
-        if(isValidBoilerQuery && priceFromQueryValue && priceToQueryValue){
+        if(isValidBoilerQuery && isValidPriceQuery){
             
             updateParamsAndFilterFromQuery(() => {
                 updatePriceFromQuery(+priceFromQueryValue,+priceToQueryValue);
@@ -106,7 +107,7 @@ const CatalogFilters = ({
             },`${currentPage}${priceQuery}${boilerQuery}`)
             return
         }
-        if( isValidPartsQuery && priceFromQueryValue && priceToQueryValue){
+        if( isValidPartsQuery && isValidPriceQuery){
             
             updateParamsAndFilterFromQuery(() => {
                 updatePriceFromQuery(+priceFromQueryValue,+priceToQueryValue);
@@ -117,7 +118,13 @@ const CatalogFilters = ({
         }
 
     } catch (error) {
-        toast.error((error as Error).message);
+        const err = error as Error;
+        if(err.message === 'URI malformed'){
+            toast.warning('Неправильный url для фильтров');
+            return
+        }
+
+        toast.error(err.message);
     }
 
     }
@@ -127,37 +134,7 @@ const CatalogFilters = ({
         setIsPriceRangeChanged(true);
     }
 
-    const updateParamsAndFilterFromQuery = async (callBack: VoidFunction, path:string) => {
-        callBack();
-
-        const data = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${path}`);
-
-        setFileredBoilerParts(data);
-
-    }
-    async function updateParamsAndFilter<T>(updatedParams: T, path: string) {
-
-        const params = router.query;
-        delete params.boiler;
-        delete params.parts;
-        delete params.priceFrom;
-        delete params.priceTo; 
-        params.first = 'cheap';
-        
-            router.push({
-                query: {
-                    ...router.query,
-                    ...updatedParams,
-                }
-            },undefined,{shallow: true}
-            );
-            const data = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${path}`);
-
-            setFileredBoilerParts(data);
-            return
-        
-        
-    }
+  
     const applyFilters = async () => {
         setIsFilterInQuery(true);
         try {
@@ -181,7 +158,7 @@ const CatalogFilters = ({
                     priceTo,
                     offset: initialPage + 1,
 
-                },`${initialPage}${boilerQuery}${partsQuery}${priceQuery}`);
+                },`${initialPage}${boilerQuery}${partsQuery}${priceQuery}`,router);
                 return
             }
             if(isPriceRangeChanged){
@@ -189,7 +166,7 @@ const CatalogFilters = ({
                     priceFrom,
                     priceTo,
                     offset: initialPage + 1,
-                },`${initialPage}${priceQuery}`);
+                },`${initialPage}${priceQuery}`,router);
 
                 return
 
@@ -201,7 +178,7 @@ const CatalogFilters = ({
                     boiler: encodedBoilerQuery,
                         parts: encodedPartsQuery,
                         offset: initialPage + 1,
-                },`${initialPage}${boilerQuery}${partsQuery}`); 
+                },`${initialPage}${boilerQuery}${partsQuery}`,router); 
                
                 return
             }
@@ -210,7 +187,7 @@ const CatalogFilters = ({
                 updateParamsAndFilter({
                     boiler: encodedBoilerQuery,
                     offset: initialPage + 1,
-                },`${initialPage}${boilerQuery}`);
+                },`${initialPage}${boilerQuery}`,router);
                 
                 return
             }
@@ -218,7 +195,7 @@ const CatalogFilters = ({
                 updateParamsAndFilter({
                     parts: encodedPartsQuery,
                     offset: initialPage + 1,
-                },`${initialPage}${partsQuery}`)
+                },`${initialPage}${partsQuery}`,router)
                 
                 return
             }
@@ -228,7 +205,7 @@ const CatalogFilters = ({
                     priceFrom,
                     priceTo,
                     offset: initialPage + 1,
-                },`${initialPage}${boilerQuery}${priceQuery}`)
+                },`${initialPage}${boilerQuery}${priceQuery}`,router)
               
                 return
             }
@@ -238,7 +215,7 @@ const CatalogFilters = ({
                     priceFrom,
                     priceTo,
                     offset: initialPage + 1,
-                },`${initialPage}${partsQuery}${priceQuery}`)
+                },`${initialPage}${partsQuery}${priceQuery}`,router)
                
                 return
             }
@@ -254,7 +231,20 @@ const CatalogFilters = ({
 
     return(
         <>
-        {isMobile? <div/> : <CatalogFiltersDesktop 
+        {isMobile? 
+        <CatalogFiltersMobile 
+        ClosePopup={ClosePopup}
+        spinner={spinner}
+        applyFilters={applyFilters}
+        priceRange={priceRange}
+        setIsPriceRangeChanged={setIsPriceRangeChanged}
+        resetFilters={resetFilters}
+        resetFilterBtnDisabled={resetFilterBtnDisabled}
+        setPriceRange={setPriceRange}
+        filtersMobileOpen={filtersMobileOpen}
+        /> 
+        : 
+        <CatalogFiltersDesktop 
         priceRange={priceRange} 
         setPriceRange={setPriceRange} 
         setIsPriceRangeChanged={setIsPriceRangeChanged}
