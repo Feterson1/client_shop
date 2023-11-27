@@ -5,22 +5,28 @@ import { IAccordion } from "@/types/common";
 
 
 
-const Accordion = ({ children, title, titleClass, arrowOpenClass }: IAccordion) => {
+const Accordion = ({ children, title, titleClass, arrowOpenClass, isMobileForFilters, hideArrowClass }: IAccordion) => {
   const [expanded,setExpanded] = useState(false);
 
   const toggleAccordion = () => setExpanded(!expanded);
 
   return (
     <>
-      <motion.button 
+      {title? (isMobileForFilters? 
+      <button
+      className={`${titleClass} ${hideArrowClass}`}
+      >{title}
+      </button> 
+      : 
+      (<motion.button 
         initial={false}
         onClick={toggleAccordion}
-        className={`${titleClass} ${expanded? arrowOpenClass : ''}`}
+        className={`${titleClass} ${expanded? isMobileForFilters? '' : arrowOpenClass : ''}`}
         >
             {title}   
-        </motion.button>
+        </motion.button>)) : ''}
       <AnimatePresence initial={false}>
-        {expanded && (
+        {(isMobileForFilters || expanded) && (
           <motion.div
           key="content"
           initial="collapsed"
