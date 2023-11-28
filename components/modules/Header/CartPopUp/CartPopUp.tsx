@@ -1,24 +1,52 @@
 import { useStore } from "effector-react";
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { AnimatePresence, motion } from 'framer-motion';
-import ProfileSvg from "@/components/elements/ProfileSvg/ProfileSvg";
 import { $mode } from "@/context/mode";
 import { IWrappedComponentProps } from "@/types/common";
-import LogoutSvg from '@/components/elements/LogoutSvg/LogoutSvg';
 import { withClickOuside } from '@/utils/withClickOutside';
 import styles from '@/styles/CartPopUp/index.module.scss';
 import ShoppingCartSvg from "@/components/elements/ShoppingCartSvg/ShoppingCartSvg";
-import { $shoppingCart } from "@/context/shoppingCart";
+import { $shoppingCart, $totalPrice, setShoppingCart, setTotalPrice } from "@/context/shoppingCart";
 import Link from "next/link";
+import CartPopUpItem from "./CartPopUpItem";
+import { getCartItemsFx } from "@/app/api/shopping-cart";
+import { $user } from "@/context/user";
+import { toast } from "react-toastify";
+import { formatPrice } from "@/utils/common";
+
 
 
 
 const CartPopUp = forwardRef<HTMLDivElement, IWrappedComponentProps>(({open,setOpen},ref) => {
     
     const mode = useStore($mode);
+    const user = useStore($user);
+    const totalPrice = useStore($totalPrice);
     const shoppingCart = useStore($shoppingCart);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
 
+    useEffect(()=>{
+        loadCartItems();
+    },[])
+
+    useEffect(() => {
+        setTotalPrice(
+            shoppingCart.reduce((defaultCount,item) => defaultCount + item.total_price,0)
+        );
+    },[shoppingCart])
+
+    const loadCartItems = async () => {
+        try {
+            const cartItems = await getCartItemsFx(`/shopping-cart/${user.userId}`);
+            setShoppingCart(cartItems);
+        } catch (error) {
+            toast.error((error as Error).message);
+            
+        }
+
+    }
+
+    
     const toggleCartDropDown = () => setOpen(!open)
 
     return (
@@ -46,7 +74,7 @@ const CartPopUp = forwardRef<HTMLDivElement, IWrappedComponentProps>(({open,setO
                 <ul className={styles.cart__popup__list}>
                     {
                         shoppingCart.length? 
-                        shoppingCart.map((item) => <li key={item.id}></li>) 
+                        shoppingCart.map((item) => <CartPopUpItem key={item.id} item={item}/>) 
                         : 
                         (<li className={styles.cart__popup__empty}>
                             <span className={`${styles.cart__popup__empty__text} ${darkModeClass}`}>Корзина пуста</span>
@@ -56,7 +84,7 @@ const CartPopUp = forwardRef<HTMLDivElement, IWrappedComponentProps>(({open,setO
                 <div className={styles.cart__popup__footer}>
                     <div className={styles.cart__popup__footer__total}>
                         <span className={`${styles.cart__popup__footer__text} ${darkModeClass}`}>Общая сумма заказа:</span>
-                        <span className={styles.cart__popup__footer__price}>0</span>
+                        <span className={styles.cart__popup__footer__price}>{formatPrice(totalPrice)} ₽</span>
                     </div>
                     <Link 
                     href={'/order'} 

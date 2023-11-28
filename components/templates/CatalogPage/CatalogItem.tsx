@@ -9,13 +9,20 @@ import { $shoppingCart } from "@/context/shoppingCart";
 import CartHoverCheckedSvg from "@/components/elements/CartHoverCheckedSvg/CartHoverCheckedSvg";
 import CartHoverSvg from "@/components/elements/CartHoverSvg/CartHoverSvg";
 import spinnerStyles from '@/styles/spinner/index.module.scss';
+import { toggleCartItem } from "@/utils/shopping-cart";
+import { $user } from "@/context/user";
 
 const CatalogItem = ({item}: {item: IBoilerPart}) => {
     const mode = useStore($mode);
+    const user = useStore($user);
     const shoppingCart = useStore($shoppingCart);
     const isInCart = shoppingCart.some((cartItem) => cartItem.partId === item.id);
     const [spinner,setSpinner] = useState(false);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
+
+    const toggleToCart = () => toggleCartItem(user.username,item.id,isInCart,setSpinner);
+
+
     return (
         <li className={`${styles.catalog__list__item} ${darkModeClass}`}>
             <img src={JSON.parse(item.images)[0]} alt={item.name}/>
@@ -32,6 +39,7 @@ const CatalogItem = ({item}: {item: IBoilerPart}) => {
                 <button 
                 className={`${styles.catalog__list__item__cart} ${isInCart? styles.added : ''}`}
                 disabled={spinner}
+                onClick={toggleToCart}
                 >
                     {spinner? 
                     <div className={spinnerStyles.spinner} style={{top:6,left:6,}}/> 

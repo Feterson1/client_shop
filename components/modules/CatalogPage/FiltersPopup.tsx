@@ -22,7 +22,7 @@ const FiltersPopup = ({
 
     const mode = useStore($mode);
     const darkModeClass = mode === 'dark'? `${styles.dark_mode}` : ``;
-    console.log(openPopup)
+  
 
 
     return (
