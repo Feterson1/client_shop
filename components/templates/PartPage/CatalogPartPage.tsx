@@ -4,7 +4,7 @@ import { $boilerPart } from '@/context/boilerPart'
 import PartImagesList from '@/components/modules/PartPage/PartImagesList'
 import { formatPrice } from '@/utils/common'
 import { $shoppingCart } from '@/context/shoppingCart'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CartHoverCheckedSvg from '@/components/elements/CartHoverCheckedSvg/CartHoverCheckedSvg'
 import CartHoverSvg from '@/components/elements/CartHoverSvg/CartHoverSvg'
 import { toggleCartItem } from '@/utils/shopping-cart'
@@ -13,6 +13,14 @@ import styles from '@/styles/Part/index.module.scss'
 import spinnerStyles from '@/styles/spinner/index.module.scss'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import PartTabs from '@/components/modules/PartPage/PartTabs'
+import DashboardSlider from '@/components/modules/DashboardPage/DashboardSlider'
+import { getBoilerPartsFx } from '@/app/api/boilerParts'
+import { toast } from 'react-toastify'
+import {
+  $boilerParts,
+  setBoilerParts,
+  setBoilerPartsByPopularity,
+} from '@/context/boilerParts'
 
 const CatalogPartPage = () => {
   const mode = useStore($mode)
@@ -20,12 +28,29 @@ const CatalogPartPage = () => {
   const isMobile = useMediaQuery(850)
   const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ``
   const boilerPart = useStore($boilerPart)
+  const boilerParts = useStore($boilerParts)
   const cartItems = useStore($shoppingCart)
   const isInCart = cartItems.some((item) => item.partId === boilerPart.id)
   const [spinnerToggleCart, setSpinnerToggleCart] = useState(false)
+  const [spinnerSlider, setSpinnerSlider] = useState(false)
   const toggleToCart = () => {
     toggleCartItem(user.username, boilerPart.id, isInCart, setSpinnerToggleCart)
   }
+  const loadBoilerPart = async () => {
+    try {
+      setSpinnerSlider(true)
+      const data = await getBoilerPartsFx(`/boiler-parts/?limit=20&offset=0`)
+      setBoilerParts(data)
+      setBoilerPartsByPopularity()
+    } catch (error) {
+      toast.error((error as Error).message)
+    } finally {
+      setTimeout(() => setSpinnerSlider(false), 1000)
+    }
+  }
+  useEffect(() => {
+    loadBoilerPart()
+  }, [])
   return (
     <section>
       <div className="container">
@@ -79,7 +104,21 @@ const CatalogPartPage = () => {
             </div>
           </div>
         </div>
-        <div className={`${styles.part__bottom} ${darkModeClass}`}></div>
+        {isMobile && (
+          <div className={styles.part__accardion}>
+            <div className={styles.part__accardion__inner}></div>
+          </div>
+        )}
+        <div className={`${styles.part__bottom} ${darkModeClass}`}>
+          <h2 className={`${styles.part__title} ${darkModeClass}`}>
+            Вам понравится
+          </h2>
+          <DashboardSlider
+            goToPartPage
+            spinner={spinnerSlider}
+            items={boilerParts.rows || []}
+          />
+        </div>
       </div>
     </section>
   )
