@@ -1,16 +1,19 @@
-import { createEffect } from "effector-next";
-import api from "../axiosClient";
+import { createEffect } from 'effector-next'
+import api from '../axiosClient'
 
+export const getBetsellerOrNewPartsFx = createEffect(async (url: string) => {
+  const { data } = await api.get(url)
 
-export const getBetsellerOrNewPartsFx = createEffect(async(url: string) => {
-    const {data} = await api.get(url);
+  return data
+})
 
-    return data;
-});
+export const getBoilerPartsFx = createEffect(async (url: string) => {
+  const { data } = await api.get(url)
 
-export const getBoilerPartsFx = createEffect(async(url: string) => {
-    const {data} = await api.get(url);
+  return data
+})
+export const getBoilerPartFx = createEffect(async (url: string) => {
+  const { data } = await api.get(url)
 
-    return data;
-});
-
+  return data
+})
