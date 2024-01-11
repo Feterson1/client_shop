@@ -4,6 +4,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useState } from 'react'
 import PartImagesItem from './PartImagesItem'
 import styles from '@/styles/Part/index.module.scss'
+import PartSlider from './PartSlider'
 
 const PartImagesList = () => {
   const boilerPart = useStore($boilerPart)
@@ -15,7 +16,7 @@ const PartImagesList = () => {
   return (
     <div className={styles.part__images}>
       {isMobile ? (
-        <div />
+        <PartSlider images={images} />
       ) : (
         <>
           <div className={styles.part__images__main}>

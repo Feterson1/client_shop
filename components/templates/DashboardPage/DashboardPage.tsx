@@ -44,6 +44,14 @@ const DashboardPage = () => {
     loadBoilerParts()
   }, [])
 
+  useEffect(() => {
+    if (shoppingCart.length) {
+      setShowAlert(true)
+      return
+    }
+    setShowAlert(false)
+  }, [shoppingCart.length])
+
   const closeAlert = () => {
     setShowAlert(false)
   }

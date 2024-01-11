@@ -6,14 +6,16 @@ import useRedirectByUserCheck from '@/hooks/useRedirectByUserCheck'
 import { IQueryParams } from '@/types/catalog'
 import { useStore } from 'effector-react'
 import Head from 'next/head'
-import router from 'next/router'
-import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import Custom404 from '../404'
 
 function PartPage({ query }: { query: IQueryParams }) {
   const { shouldLoadContent } = useRedirectByUserCheck()
   const boilerPart = useStore($boilerPart)
-
+  const router = useRouter()
+  const [error, setError] = useState(false)
   useEffect(() => {
     loadBoilerPart()
   }, [router.asPath])
@@ -21,6 +23,10 @@ function PartPage({ query }: { query: IQueryParams }) {
   const loadBoilerPart = async () => {
     try {
       const data = await getBoilerPartFx(`/boiler-parts/find/${query.partId}`)
+      if (!data) {
+        setError(true)
+        return
+      }
       setBoilerPart(data)
     } catch (error) {
       toast.error((error as Error).message)
@@ -36,13 +42,17 @@ function PartPage({ query }: { query: IQueryParams }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/svg" sizes="32x32" href="/img/logo.svg" />
       </Head>
-      {shouldLoadContent && (
-        <Layout>
-          <main>
-            <CatalogPartPage />
-            <div className="overlay" />
-          </main>
-        </Layout>
+      {error ? (
+        <Custom404 />
+      ) : (
+        shouldLoadContent && (
+          <Layout>
+            <main>
+              <CatalogPartPage />
+              <div className="overlay" />
+            </main>
+          </Layout>
+        )
       )}
     </>
   )
