@@ -4,7 +4,7 @@ import { $boilerPart } from '@/context/boilerPart'
 import PartImagesList from '@/components/modules/PartPage/PartImagesList'
 import { formatPrice } from '@/utils/common'
 import { $shoppingCart } from '@/context/shoppingCart'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import CartHoverCheckedSvg from '@/components/elements/CartHoverCheckedSvg/CartHoverCheckedSvg'
 import CartHoverSvg from '@/components/elements/CartHoverSvg/CartHoverSvg'
 import { toggleCartItem } from '@/utils/shopping-cart'
@@ -22,6 +22,7 @@ import {
 import PartAccordion from '@/components/modules/PartPage/PartAccordion'
 import styles from '@/styles/Part/index.module.scss'
 import spinnerStyles from '@/styles/spinner/index.module.scss'
+import { removeFromCartFx } from '@/app/api/shopping-cart'
 
 const CatalogPartPage = () => {
   const mode = useStore($mode)
@@ -32,21 +33,19 @@ const CatalogPartPage = () => {
   const boilerParts = useStore($boilerParts)
   const cartItems = useStore($shoppingCart)
   const isInCart = cartItems.some((item) => item.partId === boilerPart.id)
-  const [spinnerToggleCart, setSpinnerToggleCart] = useState(false)
-  const [spinnerSlider, setSpinnerSlider] = useState(false)
+  const spinnerToggleCart = useStore(removeFromCartFx.pending)
+  const spinnerSlider = useStore(getBoilerPartsFx.pending)
   const toggleToCart = () => {
-    toggleCartItem(user.username, boilerPart.id, isInCart, setSpinnerToggleCart)
+    toggleCartItem(user.username, boilerPart.id, isInCart)
   }
   const loadBoilerPart = async () => {
     try {
-      setSpinnerSlider(true)
       const data = await getBoilerPartsFx(`/boiler-parts/?limit=20&offset=0`)
       setBoilerParts(data)
       setBoilerPartsByPopularity()
     } catch (error) {
       toast.error((error as Error).message)
     } finally {
-      setTimeout(() => setSpinnerSlider(false), 1000)
     }
   }
   useEffect(() => {
