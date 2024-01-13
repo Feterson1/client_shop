@@ -10,7 +10,6 @@ import { useStore } from 'effector-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-
 const DashboardPage = () => {
   const [newParts, setNewParts] = useState<IBoilerParts>({} as IBoilerParts)
   const [betsellersParts, setBetsellersParts] = useState<IBoilerParts>(
@@ -67,7 +66,13 @@ const DashboardPage = () => {
               exit={{ opacity: 0 }}
               className={`${styles.dashboard__alert} ${darkModeClass}`}
             >
-              <CartAlert count={shoppingCart.length} closeAlert={closeAlert} />
+              <CartAlert
+                count={shoppingCart.reduce(
+                  (defaultCount, item) => defaultCount + item.count,
+                  0
+                )}
+                closeAlert={closeAlert}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -84,13 +89,18 @@ const DashboardPage = () => {
           <DashboardSlider
             items={betsellersParts.rows || []}
             spinner={spinner}
+            goToPartPage={true}
           />
         </div>
         <div className={styles.dashboard__parts}>
           <h3 className={`${styles.dashboard__parts__title} ${darkModeClass}`}>
             Новинки
           </h3>
-          <DashboardSlider items={newParts.rows || []} spinner={spinner} />
+          <DashboardSlider
+            items={newParts.rows || []}
+            spinner={spinner}
+            goToPartPage={true}
+          />
         </div>
         <div className={styles.dashboard__about}>
           <h3
