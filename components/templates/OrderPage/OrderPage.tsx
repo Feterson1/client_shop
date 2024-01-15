@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import spinnerStyles from '@/styles/spinner/index.module.scss'
 import styles from '@/styles/Order/index.module.scss'
+
 const OrderPage = () => {
   const mode = useStore($mode)
   const totalPrice = useStore($totalPrice)
