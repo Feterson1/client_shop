@@ -1,0 +1,93 @@
+import { $mode } from '@/context/mode'
+import { useStore } from 'effector-react'
+import styles from '@/styles/FeedBackForm/index.module.scss'
+import NameInput from '@/components/elements/AuthPage/NameInput'
+import { useForm } from 'react-hook-form'
+import PhoneInput from './PhoneInput'
+import EmailInput from './EmailInput'
+import MessageInput from './MessageInput'
+import { FeedbackInputs, IFeedBackInput } from '@/types/feedbackForm'
+import { MutableRefObject, useRef, useState } from 'react'
+import emailjs from '@emailjs/browser'
+import spinnerStyles from '@/styles/FeedBackForm/index.module.scss'
+import { toast } from 'react-toastify'
+
+const FeedBackForm = () => {
+  const mode = useStore($mode)
+  const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ''
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FeedbackInputs>()
+  const [spinner, setSpinner] = useState(false)
+  const formRef = useRef() as MutableRefObject<HTMLFormElement>
+
+  const submitForm = (data: FeedbackInputs) => {
+    setSpinner(true)
+    emailjs
+      .sendForm(
+        'service_3o0zsva',
+        'template_nxy1nzj',
+        formRef.current,
+        'IW6N1Oy6ooiU8_Qds'
+      )
+      .then((result) => {
+        setSpinner(false)
+        toast.success(`Сообщение отправлено! ${result.text}`)
+      })
+      .catch((error) => {
+        setSpinner(false)
+        toast.error(`Что-то пошло не так! ${error.text}`)
+      })
+    formRef.current.reset()
+  }
+
+  return (
+    <div className={`${styles.feedback_form} ${darkModeClass}`}>
+      <h3 className={`${styles.feedback_form__title} ${darkModeClass}`}>
+        Форма обратной связи
+      </h3>
+      <form
+        ref={formRef}
+        className={styles.feedback_form__form}
+        onSubmit={handleSubmit(submitForm)}
+      >
+        <NameInput
+          register={register}
+          errors={errors}
+          darkModeClass={darkModeClass}
+        />
+        <PhoneInput
+          register={register}
+          errors={errors}
+          darkModeClass={darkModeClass}
+        />
+        <EmailInput
+          register={register}
+          errors={errors}
+          darkModeClass={darkModeClass}
+        />
+        <MessageInput
+          register={register}
+          errors={errors}
+          darkModeClass={darkModeClass}
+        />
+        <div className={styles.feedback_form__form__btn}>
+          <button>
+            {spinner ? (
+              <span
+                className={spinnerStyles.spinner}
+                style={{ top: '6px', left: '47%' }}
+              />
+            ) : (
+              'Отправить сообщение'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default FeedBackForm

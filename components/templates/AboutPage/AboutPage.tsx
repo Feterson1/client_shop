@@ -1,6 +1,6 @@
 import { $mode } from '@/context/mode'
-import styles from '@/styles/AboutPage/index.module.scss'
 import { useStore } from 'effector-react'
+import styles from '@/styles/AboutPage/index.module.scss'
 
 const AboutPage = () => {
   const mode = useStore($mode)
