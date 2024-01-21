@@ -7,7 +7,7 @@ import {
   $totalPrice,
   setShoppingCart,
 } from '@/context/shoppingCart'
-import { $user } from '@/context/user'
+import { $user, $userCity } from '@/context/user'
 import { formatPrice } from '@/utils/common'
 import { useStore } from 'effector-react'
 import { useRouter } from 'next/router'
@@ -20,6 +20,7 @@ const OrderPage = () => {
   const mode = useStore($mode)
   const totalPrice = useStore($totalPrice)
   const user = useStore($user)
+  const userCity = useStore($userCity)
   const shoppingCart = useStore($shoppingCart)
   const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ``
   const [orderIsReady, setOrderIsReady] = useState(false)
@@ -41,6 +42,11 @@ const OrderPage = () => {
       const data = await makePaymentFx({
         url: '/payment',
         amount: totalPrice,
+        description: `Заказ №1 ${
+          userCity.city.length
+            ? `Город: ${userCity.city}, улица: ${userCity.street}`
+            : ''
+        }`,
       })
 
       sessionStorage.setItem('paymentId', data.id)
@@ -62,6 +68,7 @@ const OrderPage = () => {
         resetCart()
         return
       }
+      sessionStorage.removeItem('paymentId')
     } catch (error) {
       console.log((error as Error).message)
       resetCart()
