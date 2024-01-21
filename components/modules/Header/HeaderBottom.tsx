@@ -1,9 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { $mode } from '@/context/mode'
 import { useStore } from 'effector-react'
-import styles from '@/styles/Header/index.module.scss'
 import Link from 'next/link'
-import SearchSvg from '@/components/elements/SearchSvg/SearchSvg'
 import SearchInput from '@/components/elements/Header/SearchInput'
 import ModeToggler from '@/components/elements/modeToggler/modeToggler'
 import CartPopUp from './CartPopUp/CartPopUp'
@@ -11,6 +9,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { setDisableCart } from '@/context/shoppingCart'
+import styles from '@/styles/Header/index.module.scss'
 
 const HeaderBottom = () => {
   const isMedia950 = useMediaQuery(950)
@@ -43,11 +42,6 @@ const HeaderBottom = () => {
         </h1>
         <div className={`${styles.header__search}`}>
           <SearchInput />
-          <button className={`${styles.header__search__btn} ${darkModeClass}`}>
-            <span className={styles.header__search_btn__span}>
-              <SearchSvg />
-            </span>
-          </button>
         </div>
         <div className={styles.header__shopping_cart}>
           {!isMedia950 && <ModeToggler />}

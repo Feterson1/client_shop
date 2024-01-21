@@ -1,22 +1,17 @@
-import { NextRouter } from "next/router";
-
+import { NextRouter } from 'next/router'
 
 export const getWindowWidth = () => {
-    const { innerWidth: windowWidth } =
-      typeof window !== 'undefined' ? window : { innerWidth: 0 }
-  
-    return { windowWidth }
-  }
+  const { innerWidth: windowWidth } =
+    typeof window !== 'undefined' ? window : { innerWidth: 0 }
 
+  return { windowWidth }
+}
 
-
-export const formatPrice = (x:number) => {
- return  x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-
+export const formatPrice = (x: number) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 }
 
 export const createSelectOption = (value: string | number) => ({
-
   value: value,
   label: value,
 })
@@ -40,10 +35,19 @@ export const idGenerator = () => {
   )
 }
 
-
 export const getQueryParamOnFirstRender = (
   queryName: string,
   router: NextRouter
 ) =>
   router.query[queryName] ||
   router.asPath.match(new RegExp(`[&?]${queryName}=(.*)(&|$)`))
+
+export const toggleClassNameForOverlayAndBody = (overlayClassName = 'open') => {
+  document.querySelector('.overlay')?.classList.toggle(overlayClassName)
+  document.querySelector('.body')?.classList.toggle('overflow-hidden')
+}
+export const removeClassNameForOverlayAndBody = () => {
+  document.querySelector('.overlay')?.classList.remove('open')
+  document.querySelector('.overlay')?.classList.remove('open-search')
+  document.querySelector('.body')?.classList.remove('overflow-hidden')
+}

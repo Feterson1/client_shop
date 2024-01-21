@@ -1,29 +1,28 @@
-import { useEffect, useState } from "react"
+import {
+  removeClassNameForOverlayAndBody,
+  toggleClassNameForOverlayAndBody,
+} from '@/utils/common'
+import { useEffect, useState } from 'react'
 
 export const usePopup = () => {
-    const [open,setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
-    const toggleOpen = () => {
-        window.scrollTo(0,0);
-        document.querySelector('.overlay')?.classList.toggle('open');
-        document.querySelector('.body')?.classList.toggle('overflow-hidden');
-        setOpen(!open);
-    };
-    const ClosePopup = () => {
-        document.querySelector('.overlay')?.classList.remove('open');
-        document.querySelector('.body')?.classList.remove('overflow-hidden');
-        setOpen(false);
-    };
+  const toggleOpen = () => {
+    window.scrollTo(0, 0)
+    toggleClassNameForOverlayAndBody()
+    setOpen(!open)
+  }
+  const ClosePopup = () => {
+    removeClassNameForOverlayAndBody()
+    setOpen(false)
+  }
 
-    useEffect(()=>{
+  useEffect(() => {
+    const overlay = document.querySelector('.overlay')
+    overlay?.addEventListener('click', ClosePopup)
 
-        const overlay = document.querySelector('.overlay');
-        overlay?.addEventListener('click',ClosePopup);
+    return () => overlay?.removeEventListener('click', ClosePopup)
+  }, [open])
 
-        return () => overlay?.removeEventListener('click',ClosePopup);
-
-    },[open]);
-
-    return {toggleOpen, open, ClosePopup};
-
+  return { toggleOpen, open, ClosePopup }
 }
