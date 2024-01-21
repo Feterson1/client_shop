@@ -1,7 +1,7 @@
 import { $mode } from '@/context/mode'
 import { useStore } from 'effector-react'
 import styles from '@/styles/FeedBackForm/index.module.scss'
-import NameInput from '@/components/elements/AuthPage/NameInput'
+import NameInput from '@/components/elements/AuthPage/AuthNameInput'
 import { useForm } from 'react-hook-form'
 import PhoneInput from './PhoneInput'
 import EmailInput from './EmailInput'
