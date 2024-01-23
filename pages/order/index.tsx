@@ -1,10 +1,18 @@
 import Layout from '@/components/layout/layout'
+import Breadcrumbs from '@/components/modules/BreadCrumbs/BreadCrumbs'
 import OrderPage from '@/components/templates/OrderPage/OrderPage'
 import useRedirectByUserCheck from '@/hooks/useRedirectByUserCheck'
 import Head from 'next/head'
+import { useCallback } from 'react'
 
 function Order() {
   const { shouldLoadContent } = useRedirectByUserCheck()
+  const getDefaultTextGenerator = useCallback(() => 'Оформление заказа', [])
+
+  const getTextGenerator = useCallback((param: string) => {
+    ;({})[param]
+  }, [])
+
   return (
     <>
       <Head>
@@ -19,6 +27,10 @@ function Order() {
       {shouldLoadContent && (
         <Layout>
           <main>
+            <Breadcrumbs
+              getDefaultTextGenerator={getDefaultTextGenerator}
+              getTextGenerator={getTextGenerator}
+            />
             <OrderPage />
             <div className="overlay" />
           </main>

@@ -1,41 +1,49 @@
-import Layout from '@/components/layout/layout';
-import CatalogPage from '@/components/templates/CatalogPage/CatalogPage';
-import useRedirectByUserCheck from '@/hooks/useRedirectByUserCheck';
-import { IQueryParams } from '@/types/catalog';
+import Layout from '@/components/layout/layout'
+import Breadcrumbs from '@/components/modules/BreadCrumbs/BreadCrumbs'
+import CatalogPage from '@/components/templates/CatalogPage/CatalogPage'
+import useRedirectByUserCheck from '@/hooks/useRedirectByUserCheck'
+import { IQueryParams } from '@/types/catalog'
 import Head from 'next/head'
+import { useCallback } from 'react'
 
+function Catalog({ query }: { query: IQueryParams }) {
+  const { shouldLoadContent } = useRedirectByUserCheck()
 
-function Catalog({query}: {query: IQueryParams}) {
+  const getDefaultTextGenerator = useCallback(() => 'Каталог', [])
 
-  const {shouldLoadContent} = useRedirectByUserCheck();
+  const getTextGenerator = useCallback((param: string) => {
+    ;({})[param]
+  }, [])
+
   return (
     <>
       <Head>
-        <title>Аква Термикс | {shouldLoadContent? 'Главная' : ''}</title>
-        <meta charSet='UTF-8' />
-        <meta httpEquiv='X-UA-Compatible' content='IE-edge'/>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+        <title>Аква Термикс | {shouldLoadContent ? 'Главная' : ''}</title>
+        <meta charSet="UTF-8" />
+        <meta httpEquiv="X-UA-Compatible" content="IE-edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/svg" sizes="32x32" href="/img/logo.svg" />
       </Head>
       {shouldLoadContent && (
-      <Layout>
-      <main>
-        <CatalogPage query={query}/>
-        <div className='overlay'/>
-      </main>
-      </Layout>
-        )
-      
-      }
+        <Layout>
+          <main>
+            <Breadcrumbs
+              getDefaultTextGenerator={getDefaultTextGenerator}
+              getTextGenerator={getTextGenerator}
+            />
+            <CatalogPage query={query} />
+            <div className="overlay" />
+          </main>
+        </Layout>
+      )}
     </>
   )
 }
 
-export async function getServerSideProps(context: {query: IQueryParams}) {
+export async function getServerSideProps(context: { query: IQueryParams }) {
   return {
-    props:{query: {...context.query}}
+    props: { query: { ...context.query } },
   }
-  
 }
 
-export default Catalog;
+export default Catalog

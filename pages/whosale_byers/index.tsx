@@ -1,10 +1,15 @@
 import Layout from '@/components/layout/layout'
+import Breadcrumbs from '@/components/modules/BreadCrumbs/BreadCrumbs'
 import ContactsPage from '@/components/templates/ContactsPage/ContactsPage'
-import DashboardPage from '@/components/templates/DashboardPage/DashboardPage'
-import useRedirectByUserCheck from '@/hooks/useRedirectByUserCheck'
 import Head from 'next/head'
+import { useCallback } from 'react'
 
 function WholesaleByers() {
+  const getDefaultTextGenerator = useCallback(() => 'Оптовым покупателям', [])
+
+  const getTextGenerator = useCallback((param: string) => {
+    ;({})[param]
+  }, [])
   return (
     <>
       <Head>
@@ -17,6 +22,10 @@ function WholesaleByers() {
 
       <Layout>
         <main>
+          <Breadcrumbs
+            getDefaultTextGenerator={getDefaultTextGenerator}
+            getTextGenerator={getTextGenerator}
+          />
           <ContactsPage isWholesaleBuyersPage={true} />
           <div className="overlay" />
         </main>
