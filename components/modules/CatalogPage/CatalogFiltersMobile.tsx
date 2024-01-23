@@ -5,7 +5,7 @@ import styles from '@/styles/Catalog/index.module.scss';
 import spinnerStyles from '@/styles/spinner/index.module.scss';
 import FiltersPopUpTop from "./FiltersPopUpTop";
 import FiltersPopup from "./FiltersPopup";
-import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturers, setPartsManufacturers, updateBoilerManufacturers, updatePartsManufacturers } from "@/context/boilerParts";
+import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturers, setPartsManufacturers, updateBoilerManufacturer, updatePartsManufacturer } from "@/context/boilerParts";
 import { useState } from "react";
 import Accordion from "@/components/elements/Accordion/Accordion";
 import PriceRange from "./PriceRange";
@@ -79,7 +79,7 @@ const CatalogFiltersMobile = ({
                     openPopup={openBoilers} 
                     manufacturersList={boilerManufacturers} 
                     setManufacturer={setBoilerManufacturers} 
-                    updateManufacturer={updateBoilerManufacturers}                
+                    updateManufacturer={updateBoilerManufacturer}                
                 />
 
             </div>
@@ -99,7 +99,7 @@ const CatalogFiltersMobile = ({
                     openPopup={openParts} 
                     manufacturersList={partsManufacturers} 
                     setManufacturer={setPartsManufacturers} 
-                    updateManufacturer={updatePartsManufacturers}                
+                    updateManufacturer={updatePartsManufacturer}                
                 />
 
             </div>

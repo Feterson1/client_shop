@@ -1,6 +1,6 @@
 import { $mode } from "@/context/mode";
 import { useStore } from "effector-react";
-import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturers, setPartsManufacturers, updateBoilerManufacturers, updatePartsManufacturers } from "@/context/boilerParts";
+import { $boilerManufacturers, $partsManufacturers, setBoilerManufacturers, setPartsManufacturers, updateBoilerManufacturer, updatePartsManufacturer } from "@/context/boilerParts";
 import FilterManufacturerAccardion from "./FilterManufacturerAccardion";
 import Accordion from "@/components/elements/Accordion/Accordion";
 import PriceRange from "./PriceRange";
@@ -32,7 +32,7 @@ const CatalogFiltersDesktop = ({
                 manufacturersList={boilerManufacturers} 
                 title={'Производитель котлов'} 
                 setManufacturer={setBoilerManufacturers} 
-                updateManufacturer={updateBoilerManufacturers}
+                updateManufacturer={updateBoilerManufacturer}
                 />
             </div>
             <div className={styles.filters__price}>
@@ -55,7 +55,7 @@ const CatalogFiltersDesktop = ({
                 manufacturersList={partsManufacturers} 
                 title={'Производитель запчастей'} 
                 setManufacturer={setPartsManufacturers} 
-                updateManufacturer={updatePartsManufacturers}
+                updateManufacturer={updatePartsManufacturer}
                 />
             </div>
             <div className={styles.filters__actions}>

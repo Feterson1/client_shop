@@ -1,7 +1,7 @@
 import { NextRouter } from "next/router";
 import { idGenerator } from "./common";
 import { getQueryParamOnFirstRender } from "@/utils/common";
-import { setFileredBoilerParts } from "@/context/boilerParts";
+import { setFilteredBoilerParts } from "@/context/boilerParts";
 import { getBoilerPartsFx } from "@/app/api/boilerParts";
 
 const createManufacturerCheckBoxObj = (title:string) => ({
@@ -79,7 +79,7 @@ export const updateParamsAndFilterFromQuery = async (
 
   const data = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${path}`);
 
-  setFileredBoilerParts(data);
+  setFilteredBoilerParts(data);
 
 }
 export async function updateParamsAndFilter<T>(updatedParams: T, path: string, router: NextRouter,) {
@@ -100,7 +100,7 @@ export async function updateParamsAndFilter<T>(updatedParams: T, path: string, r
       );
       const data = await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${path}`);
 
-      setFileredBoilerParts(data);
+      setFilteredBoilerParts(data);
       return
   
   
