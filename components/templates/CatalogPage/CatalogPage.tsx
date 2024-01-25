@@ -1,9 +1,9 @@
-import { $mode } from "@/context/mode";
-import { useStore } from "effector-react";
-import { AnimatePresence } from "framer-motion";
-import ManufacturersBlock from "@/components/modules/CatalogPage/ManufacturersBlock";
-import FilterSelect from "../../modules/CatalogPage/FilterSelect";
-import { getBoilerPartsFx } from "@/app/api/boilerParts";
+import { $mode } from '@/context/mode'
+import { useStore } from 'effector-react'
+import { AnimatePresence } from 'framer-motion'
+import ManufacturersBlock from '@/components/modules/CatalogPage/ManufacturersBlock'
+import FilterSelect from '../../modules/CatalogPage/FilterSelect'
+import { getBoilerPartsFx } from '@/app/api/boilerParts'
 import {
   $boilerManufacturers,
   $boilerParts,
@@ -14,65 +14,65 @@ import {
   setPartsManufacturers,
   updateBoilerManufacturer,
   updatePartsManufacturer,
-} from "@/context/boilerParts";
-import { toast } from "react-toastify";
-import { useEffect, useState } from "react";
-import ReactPaginate from "react-paginate";
-import { IQueryParams } from "@/types/catalog";
-import { useRouter } from "next/router";
-import { IBoilerParts } from "@/types/boilerParts";
-import CatalogFilters from "@/components/modules/CatalogPage/CatalogFilters";
-import { usePopup } from "@/hooks/usePopup";
-import { checkQueryParams } from "@/utils/catalog";
-import FilterSvg from "@/components/elements/FilterSvg/FilterSvg";
-import skeletonStyles from "@/styles/skeleton/index.module.scss";
-import styles from "@/styles/Catalog/index.module.scss";
-import CatalogItem from "@/components/modules/CatalogPage/CatalogItem";
+} from '@/context/boilerParts'
+import { toast } from 'react-toastify'
+import { useEffect, useState } from 'react'
+import ReactPaginate from 'react-paginate'
+import { IQueryParams } from '@/types/catalog'
+import { useRouter } from 'next/router'
+import { IBoilerParts } from '@/types/boilerParts'
+import CatalogFilters from '@/components/modules/CatalogPage/CatalogFilters'
+import { usePopup } from '@/hooks/usePopup'
+import { checkQueryParams } from '@/utils/catalog'
+import FilterSvg from '@/components/elements/FilterSvg/FilterSvg'
+import skeletonStyles from '@/styles/skeleton/index.module.scss'
+import styles from '@/styles/Catalog/index.module.scss'
+import CatalogItem from '@/components/modules/CatalogPage/CatalogItem'
 
 const CatalogPage = ({ query }: { query: IQueryParams }) => {
-  const boilerManufacturers = useStore($boilerManufacturers);
-  const partsManufacturers = useStore($partsManufacturers);
-  const filteredBoilerParts = useStore($filteredBoilerParts);
-  const [isFilterInQuery, setIsFilterInQuery] = useState(false);
-  const mode = useStore($mode);
-  const boilerParts = useStore($boilerParts);
-  const [spinner, setSpinner] = useState(false);
-  const [priceRange, setPriceRange] = useState([1000, 9000]);
-  const [isPriceRangeChanged, setIsPriceRangeChanged] = useState(false);
+  const boilerManufacturers = useStore($boilerManufacturers)
+  const partsManufacturers = useStore($partsManufacturers)
+  const filteredBoilerParts = useStore($filteredBoilerParts)
+  const [isFilterInQuery, setIsFilterInQuery] = useState(false)
+  const mode = useStore($mode)
+  const boilerParts = useStore($boilerParts)
+  const [spinner, setSpinner] = useState(false)
+  const [priceRange, setPriceRange] = useState([1000, 9000])
+  const [isPriceRangeChanged, setIsPriceRangeChanged] = useState(false)
   const isValidOffset =
-    query.offset && !isNaN(+query.offset) && +query.offset > 0;
+    query.offset && !isNaN(+query.offset) && +query.offset > 0
   const [currentPage, setCurrentPage] = useState(
     isValidOffset ? +query.offset - 1 : 0,
-  );
-  const pageCount = Math.ceil(boilerParts.count / 20);
-  const darkModeClass = mode === "dark" ? `${styles.dark_mode}` : ``;
-  const router = useRouter();
+  )
+  const pageCount = Math.ceil(boilerParts.count / 20)
+  const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ``
+  const router = useRouter()
 
   const isAnyBoilerManufacturerChecked = boilerManufacturers.some(
     (item) => item.checked,
-  );
+  )
   const isAnyPartsManufacturerChecked = partsManufacturers.some(
     (item) => item.checked,
-  );
+  )
   const resetFilterBtnDisabled = !(
     isPriceRangeChanged ||
     isAnyBoilerManufacturerChecked ||
     isAnyPartsManufacturerChecked
-  );
+  )
 
   const LoadBoilerParts = async () => {
     try {
-      setSpinner(true);
-      const data = await getBoilerPartsFx("/boiler-parts?limit=20&offset=0");
+      setSpinner(true)
+      const data = await getBoilerPartsFx('/boiler-parts?limit=20&offset=0')
 
       if (!isValidOffset) {
         router.replace({
           query: {
             offset: 1,
           },
-        });
-        resetPagination(data);
-        return;
+        })
+        resetPagination(data)
+        return
       }
       if (isValidOffset) {
         if (+query.offset > Math.ceil(data.count / 20)) {
@@ -85,101 +85,95 @@ const CatalogPage = ({ query }: { query: IQueryParams }) => {
             },
             undefined,
             { shallow: true },
-          );
-          setCurrentPage(0);
-          setBoilerParts(isFilterInQuery ? filteredBoilerParts : data);
-          return;
+          )
+          setCurrentPage(0)
+          setBoilerParts(isFilterInQuery ? filteredBoilerParts : data)
+          return
         }
-        const offset = +query.offset - 1;
+        const offset = +query.offset - 1
         const result = await getBoilerPartsFx(
           `/boiler-parts/?limit=20&offset=${offset}`,
-        );
-        setCurrentPage(offset);
-        setBoilerParts(isFilterInQuery ? filteredBoilerParts : result);
-        return;
+        )
+        setCurrentPage(offset)
+        setBoilerParts(isFilterInQuery ? filteredBoilerParts : result)
+        return
       }
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error((error as Error).message)
     } finally {
-      setTimeout(() => setSpinner(false), 1000);
+      setTimeout(() => setSpinner(false), 1000)
     }
-  };
+  }
 
-  const { toggleOpen, open, ClosePopup } = usePopup();
+  const { toggleOpen, open, ClosePopup } = usePopup()
 
   useEffect(() => {
-    LoadBoilerParts();
-  }, [filteredBoilerParts, isFilterInQuery]);
+    LoadBoilerParts()
+  }, [filteredBoilerParts, isFilterInQuery])
 
   const resetPagination = (data: IBoilerParts) => {
-    setCurrentPage(0);
-    setBoilerParts(data);
-  };
+    setCurrentPage(0)
+    setBoilerParts(data)
+  }
 
   const resetFilters = async () => {
     try {
-      const data = await getBoilerPartsFx("/boiler-parts?limit=20&offset=0");
+      const data = await getBoilerPartsFx('/boiler-parts?limit=20&offset=0')
 
-      const params = router.query;
-      delete params.boiler;
-      delete params.parts;
-      delete params.priceFrom;
-      delete params.priceTo;
-      params.first = "cheap";
+      const params = router.query
+      delete params.boiler
+      delete params.parts
+      delete params.priceFrom
+      delete params.priceTo
+      params.first = 'cheap'
 
-      router.push({ query: { ...params } }, undefined, { shallow: true });
+      router.push({ query: { ...params } }, undefined, { shallow: true })
 
       setBoilerManufacturers(
-        boilerManufacturers.map((item) => ({ ...item, checked: false })),
-      );
+        boilerManufacturers.map((item) => ({
+          ...item,
+          checked: false,
+        })),
+      )
       setPartsManufacturers(
-        partsManufacturers.map((item) => ({ ...item, checked: false })),
-      );
+        partsManufacturers.map((item) => ({
+          ...item,
+          checked: false,
+        })),
+      )
 
-      setBoilerParts(data);
-      setPriceRange([1000, 9000]);
-      setIsPriceRangeChanged(false);
+      setBoilerParts(data)
+      setPriceRange([1000, 9000])
+      setIsPriceRangeChanged(false)
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error((error as Error).message)
     }
-  };
+  }
 
   const handlePageChange = async ({ selected }: { selected: number }) => {
-    setSpinner(true);
+    setSpinner(true)
     try {
-      const data = await getBoilerPartsFx("/boiler-parts?limit=20&offset=0");
+      const data = await getBoilerPartsFx('/boiler-parts?limit=20&offset=0')
       if (selected > pageCount) {
-        resetPagination(isFilterInQuery ? filteredBoilerParts : data);
-        return;
+        resetPagination(isFilterInQuery ? filteredBoilerParts : data)
+        return
       }
 
       if (isValidOffset && +query.offset > Math.ceil(data.count / 2)) {
-        resetPagination(isFilterInQuery ? filteredBoilerParts : data);
-        return;
+        resetPagination(isFilterInQuery ? filteredBoilerParts : data)
+        return
       }
       const { isValidBoilerQuery, isValidPartsQuery, isValidPriceQuery } =
-        checkQueryParams(router);
+        checkQueryParams(router)
 
       const result =
         await getBoilerPartsFx(`/boiler-parts?limit=20&offset=${selected}
-            ${
-              isFilterInQuery && isValidBoilerQuery
-                ? `&boiler=${router.query.boiler}`
-                : ""
-            }
-            ${
-              isFilterInQuery && isValidPartsQuery
-                ? `&parts=${router.query.parts}`
-                : ""
-            }
-            ${
-              isFilterInQuery && isValidPriceQuery
-                ? `&priceFrom=${router.query.priceFrom}&priceTo=${router.query.priceTo}`
-                : ""
-            }
+            ${isFilterInQuery && isValidBoilerQuery ? `&boiler=${router.query.boiler}` : ''}
+            ${isFilterInQuery && isValidPartsQuery ? `&parts=${router.query.parts}` : ''}
+            ${isFilterInQuery && isValidPriceQuery ? `&priceFrom=${router.query.priceFrom}&priceTo=${router.query.priceTo}` : ''}
                  
                  
-                 `);
+                 `)
 
       router.push(
         {
@@ -190,16 +184,16 @@ const CatalogPage = ({ query }: { query: IQueryParams }) => {
         },
         undefined,
         { shallow: true },
-      );
+      )
 
-      setCurrentPage(selected);
-      setBoilerParts(result);
+      setCurrentPage(selected)
+      setBoilerParts(result)
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error((error as Error).message)
     } finally {
-      setTimeout(() => setSpinner(false), 1000);
+      setTimeout(() => setSpinner(false), 1000)
     }
-  };
+  }
 
   return (
     <section className={styles.catalog}>
@@ -267,9 +261,7 @@ const CatalogPage = ({ query }: { query: IQueryParams }) => {
                 {Array.from(new Array(20)).map((_, i) => (
                   <li
                     key={i}
-                    className={`${skeletonStyles.skeleton__item} ${
-                      mode === "dark" ? `${skeletonStyles.dark_mode}` : ``
-                    }`}
+                    className={`${skeletonStyles.skeleton__item} ${mode === 'dark' ? `${skeletonStyles.dark_mode}` : ``}`}
                   >
                     <div className={skeletonStyles.skeleton__item__light}></div>
                   </li>
@@ -297,13 +289,13 @@ const CatalogPage = ({ query }: { query: IQueryParams }) => {
             nextClassName={styles.catalog__bottom__list__next}
             breakClassName={styles.catalog__bottom__list__break}
             breakLinkClassName={`${styles.catalog__bottom__list__break__link} ${darkModeClass}`}
-            breakLabel={"..."}
+            breakLabel={'...'}
             onPageChange={handlePageChange}
           />
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default CatalogPage;
+export default CatalogPage

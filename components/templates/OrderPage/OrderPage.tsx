@@ -104,7 +104,7 @@ const OrderPage = () => {
                   Товары:(
                   {shoppingCart.reduce(
                     (defaultCount, item) => defaultCount + item.count,
-                    0
+                    0,
                   )}
                   )
                 </span>
